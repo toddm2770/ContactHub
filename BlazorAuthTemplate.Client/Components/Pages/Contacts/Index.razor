@@ -1,0 +1,185 @@
+﻿@page "/contacts"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IContactService ContactService
+@inject ICategoryService CategoryService
+@inject NavigationManager Nav
+
+
+
+<div class="container">
+
+	<div class="mt-3 text-center">
+
+		@if (!string.IsNullOrWhiteSpace(SearchTerm))
+		{
+			<h1>Showing Results for "@SearchTerm"</h1>
+		}
+		else if (CategoryId is not null or 0)
+		{
+			<h1>Category: @(categories.FirstOrDefault(c => c.Id == CategoryId)?.Name ?? "Unknown")</h1>
+		}
+		else
+		{
+			<h1>All Contacts</h1>
+		}
+		<div class="text-end text-md-center">
+			<a href="contacts/create" class="mb-2 btn btn-primary rounded-pill">Add New Contact</a>
+		</div>
+
+
+
+
+	</div>
+	<div class="row g-3">
+		<div class="col-12 col-lg-4">
+			<div class="sideNav">
+				<form @onsubmit="HandleSearch">
+					<div class="input-group">
+						<InputText @bind-Value="searchInput" class="form-control" placeholder="search"/>
+						<button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+					</div>
+				</form>
+				<div>
+					<label class="form-label mt-2">Category Filter</label>
+					<InputSelect class="form-select" @bind-Value="CategoryId" @bind-Value:after="HandleCategoryChange">
+						<option value="">All Contacts</option>
+						@foreach(var category in categories)
+						{
+							<option value="@category.Id">@category.Name</option>
+						}
+					</InputSelect>
+				</div>
+			</div>
+			@if (!string.IsNullOrEmpty(toastColor))
+			{
+				<ToastMessage @key="messageId" Message="@toastMessage" Color="@toastColor" />
+			}
+		</div>
+		<div class="col-12 col-lg-8">
+			<div class="row row-cols-1 container">
+				@foreach(var Contact in contacts)
+				{
+						<ContactCard Contact="Contact"></ContactCard>
+				}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@code {
+	[CascadingParameter]
+	private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+	[SupplyParameterFromQuery]
+	public int? CategoryId { get; set; }
+
+	[SupplyParameterFromQuery]
+	public string? SearchTerm { get; set; }
+
+	[SupplyParameterFromQuery]
+	public string? Message { get; set; }
+
+	private UserInfo? userInfo;
+
+	private IEnumerable<ContactDTO> contacts = [];
+
+	private IEnumerable<CategoryDTO> categories = [];
+
+	private string? searchInput;
+
+	private string? toastMessage;
+
+	private string? toastColor;
+
+	private Guid messageId = Guid.NewGuid();
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+			contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+
+			categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine(ex);
+		}
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if (!string.IsNullOrEmpty(Message))
+		{
+			ShowToastMessage(Message);
+		}
+
+
+		if (!string.IsNullOrWhiteSpace(SearchTerm))
+		{
+			searchInput = SearchTerm;
+			CategoryId = null;
+
+			contacts = await ContactService.SearchContactsAsync(SearchTerm, userInfo!.UserId);
+
+		}
+		else if(CategoryId is not null or 0)
+		{
+			searchInput = null;
+			contacts = await ContactService.GetContactByCategoryIdAsync(CategoryId.Value, userInfo!.UserId);
+		}
+		else
+		{
+			CategoryId = null;
+			searchInput = null;
+			contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+		}
+
+	}
+
+	private void HandleCategoryChange()
+	{
+		Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
+		{
+			{nameof(CategoryId), CategoryId},
+			{nameof(SearchTerm), null},
+			{nameof(Message), null}
+		};
+
+		string url = Nav.GetUriWithQueryParameters(queryParameters);
+		Nav.NavigateTo(url);
+	}
+
+	private void HandleSearch()
+	{
+		Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
+		{
+			{nameof(CategoryId), null},
+			{nameof(SearchTerm), searchInput},
+			{nameof(Message), null}
+		};
+
+		string url = Nav.GetUriWithQueryParameters(queryParameters);
+		Nav.NavigateTo(url);
+	}
+
+	private void ShowToastMessage(string message)
+	{
+		toastMessage = message;
+
+		if (message.ToLower().StartsWith("Error"))
+		{
+			toastColor = "danger";
+		}
+		else
+		{
+			toastColor = "success";
+		}
+
+		messageId = Guid.NewGuid();
+	}
+}

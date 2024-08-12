@@ -1,0 +1,76 @@
+﻿@page "/contacts/email/{contactId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+
+@inject IContactService ContactService
+@inject NavigationManager Nav
+
+<PageTitle>ContactHub | Email Contact</PageTitle>
+<div class="container">
+	<div class="card shadow-lg my-3">
+		<div class="card-header">
+			<h1>Email Contact</h1>
+		</div>
+		<div class="card-body">
+			<EmailForm EmailData="emailData" OnSubmit="HandleSubmit"></EmailForm>
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public int ContactId { get; set; }
+
+	[CascadingParameter]
+	private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+	private UserInfo? userInfo;
+
+	private ContactDTO? contact;
+
+	private EmailData? emailData;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+			contact = await ContactService.GetContactByIdAsync(ContactId, userInfo!.UserId);
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine(ex);
+		}
+
+		if (contact is null)
+		{
+			Nav.NavigateTo("/contacts");
+		}
+		else
+		{
+			emailData = new EmailData()
+				{
+					Recipients = contact.Email
+				};
+		}
+	}
+
+	private async Task HandleSubmit(EmailData emailData)
+	{
+		string message = $"Error: Something went wrong sending your email to your contact {contact?.FullName}. Please try again later.";
+
+		try
+		{
+
+			message = $"Success: Your email to {contact?.FullName} was sent successfully.";
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+		}
+
+		Nav.NavigateTo($"contacts?message={message}");
+	}
+
+}

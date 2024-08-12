@@ -1,0 +1,17 @@
+﻿<div class="accordion" id="@accordionId">
+	@foreach (var category in Categories)
+	{
+		<CategoryAccordionItem Category="category" AccordionId="@accordionId" @key="category.Id" OnDelete="OnCategoryDelete"/>
+	}
+</div>
+
+@code {
+
+	[Parameter, EditorRequired]
+	public IEnumerable<CategoryDTO> Categories { get; set; } = [];
+
+	private string accordionId = Guid.NewGuid().ToString();
+
+	[Parameter, EditorRequired]
+	public EventCallback<int> OnCategoryDelete { get; set; }
+}

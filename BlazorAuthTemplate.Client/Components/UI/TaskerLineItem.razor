@@ -1,0 +1,51 @@
+﻿@using BlazorAuthTemplate.Client.Models
+@rendermode InteractiveAuto
+
+<div class="d-flex flex-grow">
+    <div><InputCheckbox @bind-Value="TaskerItem!.IsComplete" @bind-Value:after="CompletedItem"></InputCheckbox></div>
+    <div class="px-2 flex-grow-1 @(TaskerItem.IsComplete ? "complete" : "")">@TaskerItem?.Name</div>
+    <div><a role="button" @onclick="DeleteItem" @onclick:preventDefault><i class="bi bi-trash text-danger"></i></a></div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public TaskerItemDTO? TaskerItem { get; set; }
+
+    /// <summary>
+    /// Delete task item by callback
+    /// </summary>
+    [Parameter]
+    public EventCallback<TaskerItemDTO> OnDeleteCallBack { get; set; }
+
+    [Parameter]
+    public EventCallback<TaskerItemDTO> OnCompleteCallBack { get; set; }
+
+
+    public async Task DeleteItem()
+    {
+        try
+        {
+            await OnDeleteCallBack.InvokeAsync(TaskerItem);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    public async Task CompletedItem()
+    {
+        try
+        {
+            await OnCompleteCallBack.InvokeAsync(TaskerItem);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+}
+

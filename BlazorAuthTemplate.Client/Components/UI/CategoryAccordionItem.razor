@@ -1,0 +1,86 @@
+﻿@if (Category is not null)
+{
+	<div class="accordion-item">
+		<div class="accordion-header">
+			@if (status == Status.Viewing)
+			{
+				<div class="d-md-flex gap-3 p-3">
+					<div class="flex-grow-1 gap-2 hstack align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id">
+						@Category.Name
+					</div>
+					<div class="hstack gap-2">
+						<a role="button">
+							<i class="bi bi-pencil-fill text-primary" aria-label="Edit Category"></i>
+						</a>
+						<a role="button" @onclick="() => status = Status.Deleting">
+							<i class="bi bi-trash-fill text-danger" aria-label="Delete Category"></i>
+						</a>
+						<a role="button">
+							<i class="bi bi-envelope-fill text-info" aria-label="Email Category"></i>
+						</a>
+					</div>
+				</div>
+			}
+			else if (status == Status.Deleting)
+			{
+				<div class="d-md-flex gap-3 p-3">
+					<div class="flex-grow-1 gap-2 hstack align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id">
+						@Category.Name
+					</div>
+					<div>
+						<i class="bi bi-exclamation-triangle text-danger"></i>
+						Are you sure you want to delete this category?
+					</div>
+					<div class="hstack gap-2 mt-2">
+						<button class="btn btn-danger btn-small" @onclick="HandleDelete">
+							<i class="bi bi-trash-fill" aria-label="Delete Category"></i>Delete
+						</button>
+						<button class="btn btn-outline-secondary btn-small" @onclick="() => status = Status.Viewing">
+							<i class="bi bi-x text-danger" aria-label="Cancel Category"></i>Cancel
+						</button>
+					</div>
+				</div>
+			}
+			else if (status == Status.Editing)
+			{
+				
+			}
+		</div>
+		<div id="collapse-@Category.Id" class="accordion-collapse collapse" data-bs-parent="@AccordionId">
+			<div class="accordion-body">
+				<ul class="list-group">
+					<li class="list-group-item text-center lead text-secondary">
+						Information About Category Goes Here
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter, EditorRequired]
+	public string? AccordionId { get; set; }
+
+	[Parameter, EditorRequired]
+	public CategoryDTO? Category { get; set; }
+
+	[Parameter, EditorRequired]
+	public EventCallback<int> OnDelete { get; set; }
+
+	private enum Status
+	{
+		Viewing,
+		Editing,
+		Deleting
+	}
+
+	private Status status = Status.Viewing;
+
+	private async Task HandleDelete()
+	{
+		await OnDelete.InvokeAsync(Category!.Id);
+		status = Status.Viewing;
+	}
+}
+

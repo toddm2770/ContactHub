@@ -1,0 +1,137 @@
+﻿@page "/tasker"
+@using BlazorAuthTemplate.Client.Helpers
+@using BlazorAuthTemplate.Client.Models
+@using BlazorAuthTemplate.Client.Services.Interfaces
+@using BlazorAuthTemplate.Client.Components.UI
+@using Microsoft.AspNetCore.Authorization
+
+@inject ITaskerItemService _TaskerItemService
+
+@rendermode InteractiveAuto
+
+@attribute [Authorize]
+
+<div class="d-flex align-items-center justify-content-center p-3">
+    <div class="task p-3">
+        <div class="text-center mb-3">
+            <img src="/image/MyLogoLightSm.png" width="150" />
+        </div>
+        <div>
+            <EditForm Model="taskerItem" OnValidSubmit="AddTask" FormName="taskForm">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <div class="d-flex flex-row gap-2">
+                    <InputText @ref="taskerInput" class="form-control" placeholder="Enter a task" @bind-Value="taskerItem.Name"></InputText>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+                <div>
+                    @* MS Component for displaying an Exception message *@
+                    <ValidationMessage For="() => taskerItem.Name"></ValidationMessage>
+                </div>
+            </EditForm>
+        </div>
+        <hr />
+        <div class="vstack">
+            @foreach (TaskerItemDTO item in taskerItems)
+            {
+                @* Component for displaying the Task List *@
+                <TaskerLineItem TaskerItem="item" OnDeleteCallBack="@DeleteTask" OnCompleteCallBack="@CompleteTask"></TaskerLineItem>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private TaskerItemDTO taskerItem = new();
+    private List<TaskerItemDTO> taskerItems = new();
+    private InputText? taskerInput { get; set; }
+
+    private UserInfo? userInfo;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+            await LoadTaskerItemsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+    }
+
+    private async Task AddTask()
+    {
+        try
+        {
+
+            await _TaskerItemService.CreateTaskerItemAsync(taskerItem, userInfo!.UserId);
+
+            taskerItem = new();
+
+            await LoadTaskerItemsAsync();
+        }
+        catch (Exception)
+        {
+            await taskerInput!.Element!.Value.FocusAsync();
+            throw;
+        }
+
+    }
+
+
+    private async Task DeleteTask(TaskerItemDTO taskerItem)
+    {
+
+        try
+        {
+            await _TaskerItemService.DeleteTaskerItemAsync(taskerItem.Id, userInfo!.UserId);
+
+            await LoadTaskerItemsAsync();
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+
+    private async Task CompleteTask(TaskerItemDTO taskerItem)
+    {
+        try
+        {
+
+            await _TaskerItemService.UpdateTaskerItemAsync(taskerItem, userInfo!.UserId);
+            await LoadTaskerItemsAsync();
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private async Task LoadTaskerItemsAsync()
+    {
+        try
+        {
+            //Service
+            taskerItems = (await _TaskerItemService.GetTaskerItemsAsync(userInfo?.UserId!)).ToList();
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            taskerItems = new();
+            throw;
+
+        }
+    }
+}
+ 

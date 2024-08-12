@@ -1,0 +1,29 @@
+﻿@page "/contacts/create"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IContactService ContactService
+@inject NavigationManager Nav
+
+
+<PageTitle>Create Contact</PageTitle>
+
+<div class="container p-3 my-5 border border-2 shadow-lg bg-light">
+	<ContactForm Contact="new ContactDTO()" OnSubmit="HandleSubmit"/>
+</div>
+
+
+@code {
+	[CascadingParameter]
+	private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+	private async Task HandleSubmit(ContactDTO contact)
+	{
+		UserInfo? userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+		if (userInfo is not null)
+		{
+			await ContactService.CreateContactAsync(contact, userInfo.UserId);
+			Nav.NavigateTo("contacts");
+		}
+	}
+}

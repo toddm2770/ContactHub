@@ -1,0 +1,85 @@
+﻿@page "/categories"
+@using BlazorAuthTemplate.Client.Helpers
+@using BlazorAuthTemplate.Client.Models
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@inject ICategoryService CategoryService
+
+<div class="container">
+	<EditForm Model="formCategory" OnValidSubmit="HandleSubmit">
+		<DataAnnotationsValidator/>
+		<ul class="list-group my-3">
+			<li class="list-group-item">
+				<label class="form-label" for="categoryName">
+					Add Category
+				</label>
+				<div class="vstack">
+					<InputText class="form-control" plaveholder="Category Name" @bind-Value="formCategory.Name"/>
+					<button type="submit" class="btn btn-primary mt-2">
+						<i class="bi bi-floppy"></i>
+					</button>
+				</div>
+				<ValidationMessage For="() => formCategory.Name" />
+			</li>
+		</ul>
+	</EditForm>
+	<CategoryAccordion Categories="categories" OnCategoryDelete="DeleteCategory"/>
+</div>
+
+@code {
+	[CascadingParameter]
+	private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+
+	private UserInfo? userInfo;
+
+	//holds all the categories for the user
+	private IEnumerable<CategoryDTO> categories = [];
+
+	//used for the edit form model
+	private CategoryDTO formCategory = new CategoryDTO();
+
+	protected override async Task OnInitializedAsync()
+	{
+		userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+		//get all the categories
+		categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+	}
+
+	private async Task HandleSubmit()
+	{
+		try
+		{
+			await CategoryService.CreateCategoryAsync(formCategory, userInfo!.UserId);
+			//clear the form
+			formCategory = new CategoryDTO();
+
+			//reload the categories
+			categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+			throw;
+		}
+	}
+
+	private async Task DeleteCategory(int categoryId)
+	{
+		try
+		{
+			await CategoryService.DeleteCategoryAsync(categoryId, userInfo!.UserId);
+			//reload the categories
+			categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine(ex);
+			throw;
+		}
+	}
+
+}
