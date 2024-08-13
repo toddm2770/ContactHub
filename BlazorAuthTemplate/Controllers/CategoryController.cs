@@ -15,25 +15,70 @@ namespace BlazorAuthTemplate.Controllers
 
 		private string _userId => User.GetUserId()!;
 
-
-		public async Task<ActionResult<CategoryDTO>> CreateCategoryAsync(CategoryDTO category, string userId)
+		public CategoryController(ICategoryService categoryService)
 		{
-			CategoryDTO createdCategory = await _categoryService.CreateCategoryAsync(category, userId);
-
-			return createdCategory;
+			_categoryService = categoryService;
 		}
 
-		public async Task<ActionResult<CategoryDTO>> GetCategoriesAsync(string userId)
+		[HttpGet]
+		public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
 		{
-			var categories = await _categoryService.GetCategoriesAsync(userId);
-			return Ok(categories);
+			try
+			{
+				IEnumerable<CategoryDTO> categories = await _categoryService.GetCategoriesAsync(_userId);
+				return Ok(categories);
+			}
+			catch (Exception ex)
+			{
+
+				Console.WriteLine(ex);
+				return Problem();
+			}
 		}
 
-
-		public async Task<ActionResult> DeleteCategoryAsync(int id, string userId)
+		[HttpGet]
+		public async Task<ActionResult<CategoryDTO?>> GetCategoryById([FromRoute] int id)
 		{
-			await _categoryService.DeleteCategoryAsync(id, userId);
-			return NoContent();
+			try
+			{
+				CategoryDTO? category = await _categoryService.GetCategoryByIdAsync(id, _userId);
+				return category == null ? NotFound() : Ok(category);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return Problem();
+			}
+		}
+
+		[HttpPost]
+		public async Task<ActionResult<CategoryDTO>> CreateCategory([FromBody] CategoryDTO category)
+		{
+			try
+			{
+				CategoryDTO createdCategory = await _categoryService.CreateCategoryAsync(category, _userId);
+				return CreatedAtAction(nameof(GetCategoryById), new {id = createdCategory.Id}, category);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return Problem();
+			}
+		}
+
+		[HttpDelete("{id:int}")]
+		public async Task<ActionResult> DeleteCategory([FromRoute] int id)
+		{
+			try
+			{
+				await _categoryService.DeleteCategoryAsync(id, _userId);
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return Problem();
+			}
 		}
 	}
 }

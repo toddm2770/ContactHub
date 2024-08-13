@@ -17,7 +17,7 @@ namespace BlazorAuthTemplate.Services
             return category;
         }
 
-        public async Task<Category?> GetCategoryAsync(int Id, string userId)
+        public async Task<Category?> GetCategoryByIdAsync(int Id, string userId)
         {
             using ApplicationDbContext context = contextFactory.CreateDbContext();
 

@@ -8,7 +8,8 @@ namespace BlazorAuthTemplate.Services.Interfaces
         Task<Category> CreateCategoryAsync(Category category);
 
         //read
-        Task<Category?> GetCategoryAsync(int Id, string userId);
+        Task<Category?> GetCategoryByIdAsync(int Id, string userId);
+
         Task<List<Category>> GetCategoriesAsync(string userId);
 
         //update

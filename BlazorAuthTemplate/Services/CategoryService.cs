@@ -8,10 +8,15 @@ namespace BlazorAuthTemplate.Services
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _repository;
+		public CategoryService(ICategoryRepository repository)
+		{
+			_repository = repository;
+		}
 
-        public CategoryService(ICategoryRepository repository)
+		public async Task<CategoryDTO?> GetCategoryByIdAsync(int categoryId, string userId)
         {
-            _repository = repository;
+            Category? category = await _repository.GetCategoryByIdAsync(categoryId, userId); ;
+            return category?.ToDTO();
         }
 
         public async Task<CategoryDTO> CreateCategoryAsync(CategoryDTO category, string userId)
@@ -39,5 +44,6 @@ namespace BlazorAuthTemplate.Services
 
             return categoryDTOs;
         }
+
     }
 }

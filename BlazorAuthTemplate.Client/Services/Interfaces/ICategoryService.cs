@@ -13,5 +13,14 @@ namespace BlazorAuthTemplate.Client.Services.Interfaces
 
 		//delete Category for the user
 		Task DeleteCategoryAsync(int id, string userId);
+
+		Task<CategoryDTO?> GetCategoryByIdAsync(int categoryId, string userId);
+
+		// Update
+		//Task UpdateCategoryAsync(CategoryDTO category, string userId);
+
+
+		// Email
+		// Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId);
 	}
 }

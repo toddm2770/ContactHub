@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BlazorAuthTemplate.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using BlazorAuthTemplate.Client.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

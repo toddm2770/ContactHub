@@ -32,7 +32,17 @@ namespace BlazorAuthTemplate.Client.Services
 
 		public async Task<IEnumerable<CategoryDTO>> GetCategoriesAsync(string userId)
 		{
-			return await _httpClient.GetFromJsonAsync<IEnumerable<CategoryDTO>>($"api/category") ?? [];
+			return await _httpClient.GetFromJsonAsync<IEnumerable<CategoryDTO>>("api/category") ?? [];
+		}
+
+		public async Task<CategoryDTO?> GetCategoryByIdAsync(int categoryId, string userId)
+		{
+			return await _httpClient.GetFromJsonAsync<CategoryDTO>($"api/category/{categoryId}");
+		}
+
+		public Task UpdateCategoryAsync(CategoryDTO category, string userId)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
