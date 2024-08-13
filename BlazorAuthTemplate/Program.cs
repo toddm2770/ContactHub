@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BlazorAuthTemplate.Services.Interfaces;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using BlazorAuthTemplate.Client.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,10 +46,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailService>();
-//builder.Services.AddSingleton<IEmailSender, EmailService>();
+//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, SendGridEmailService>();
+//builder.Services.AddSingleton<IEmailSender, SendGridEmailService>();
 
 builder.Services.AddScoped<ITaskerItemService, TaskerItemService>();
 builder.Services.AddScoped<ITaskerItemRepository, TaskerItemRepository>();
@@ -57,6 +59,10 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 builder.Services.AddScoped<IContactRepository, ContactRepository> ();
 builder.Services.AddScoped<IContactService, ContactService>();
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, GoogleEmailService>();
+builder.Services.AddSingleton<IEmailSender, GoogleEmailService>();
 
 var app = builder.Build();
 

@@ -8,7 +8,25 @@ namespace BlazorAuthTemplate.Client.Services.Interfaces
 	{
 		Task<ContactDTO> CreateContactAsync(ContactDTO Contact, string userId);
 
-		Task<ContactDTO> GetContactByIdAsync(int Id, string userId);
+
+		/// <summary>
+		/// sends an email to the specified contact based on the user's id
+		/// </summary>
+		/// <param name="contactId"></param>
+		/// <param name="emailData"></param>
+		/// <param name="userId"></param>
+		/// <returns>true/false if successful or not</returns>
+		Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId); 
+
+		/// <summary>
+		/// delete contact from the database based on the user's id
+		/// </summary>
+		/// <param name="contactId"></param>
+		/// <param name="userId"></param>
+		/// <returns></returns>
+		Task DeleteContactAsync(int contactId, string userId);
+
+		Task<ContactDTO?> GetContactByIdAsync(int Id, string userId);
 
 		/// <summary>
 		/// Updates a contact that belongs to the use

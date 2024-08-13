@@ -3,6 +3,8 @@ using BlazorAuthTemplate.Client.Services.Interfaces;
 using BlazorAuthTemplate.Helpers;
 using BlazorAuthTemplate.Models;
 using BlazorAuthTemplate.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Newtonsoft.Json.Linq;
 
 namespace BlazorAuthTemplate.Services
@@ -10,10 +12,12 @@ namespace BlazorAuthTemplate.Services
 	public class ContactService : IContactService
 	{
 		private readonly IContactRepository _repository;
+		private readonly IEmailSender _emailSender;
 
-		public ContactService(IContactRepository repository)
+		public ContactService(IContactRepository repository, IEmailSender emailSender)
 		{
 			_repository = repository;
+			_emailSender = emailSender;
 		}
 		public async Task<ContactDTO> CreateContactAsync(ContactDTO contactDTO, string userId)
 		{
@@ -120,6 +124,32 @@ namespace BlazorAuthTemplate.Services
 			IEnumerable<Contact> contacts = await _repository.SearchContactsAsync(searchTerm, userId);
 
 			return contacts.Select(c => c.ToDTO());
+		}
+
+		public async Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId)
+		{
+			try
+			{
+				Contact? contact = await _repository.GetContactByIdAsync(contactId, userId);
+				if (contact == null)
+				{
+					return false;
+				}
+
+				await _emailSender.SendEmailAsync(contact.Email!, emailData.Subject!, emailData.Message!);
+
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return false;
+			}
+		}
+
+		public async Task DeleteContactAsync(int contactId, string userId)
+		{
+			await _repository.DeleteContactAsync(contactId, userId);
 		}
 	}
 }

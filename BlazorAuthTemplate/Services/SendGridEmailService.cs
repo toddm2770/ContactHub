@@ -15,13 +15,13 @@ namespace BlazorAuthTemplate.Services
 	/// "SendGridEmail": The email address for your SendGrid sender <br />
 	/// "SendGridName": The name your emails will appear from
 	/// </summary>
-	public class EmailService : IEmailSender, IEmailSender<ApplicationUser>
+	public class SendGridEmailService : IEmailSender, IEmailSender<ApplicationUser>
 	{
 		private readonly string _sendGridKey;
 		private readonly string _fromAddress;
 		private readonly string _fromName;
 
-		public EmailService(IConfiguration config)
+		public SendGridEmailService(IConfiguration config)
 		{
 			_sendGridKey = config["SendGridKey"] ?? Environment.GetEnvironmentVariable("SendGridKey")
 				?? throw new InvalidOperationException("SendGridKey not found!");

@@ -1,5 +1,5 @@
 ﻿@page "/contacts/email/{contactId:int}"
-@rendermode InteractiveServer
+@rendermode InteractiveWebAssembly
 @attribute [Authorize]
 
 
@@ -56,14 +56,16 @@
 		}
 	}
 
-	private async Task HandleSubmit(EmailData emailData)
+	private async Task HandleSubmit(EmailData formemailData)
 	{
 		string message = $"Error: Something went wrong sending your email to your contact {contact?.FullName}. Please try again later.";
 
 		try
 		{
-
-			message = $"Success: Your email to {contact?.FullName} was sent successfully.";
+			if (await ContactService.EmailContactAsync(ContactId, formemailData, userInfo!.UserId))
+			{
+				message = $"Success: Your email to {contact?.FullName} was sent successfully.";
+			}
 		}
 		catch (Exception ex)
 		{
