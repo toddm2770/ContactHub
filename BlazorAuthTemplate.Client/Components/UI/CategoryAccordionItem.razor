@@ -9,14 +9,17 @@
 						@Category.Name
 					</div>
 					<div class="hstack gap-2">
-						<a role="button">
+						<a role="button" @onclick="() => status = Status.Editing" class="me-1">
 							<i class="bi bi-pencil-fill text-primary" aria-label="Edit Category"></i>
 						</a>
-						<a role="button" @onclick="() => status = Status.Deleting">
+						<a role="button" @onclick="() => status = Status.Deleting" class="me-1">
 							<i class="bi bi-trash-fill text-danger" aria-label="Delete Category"></i>
 						</a>
-						<a role="button">
+						<a href="categories/email/@Category.Id" role="button" class="me-1">
 							<i class="bi bi-envelope-fill text-info" aria-label="Email Category"></i>
+						</a>
+						<a href="contacts?categoryId=@Category.Id" class="me-1">
+							<i class="bi bi-eye-fill" aria-label="View Category"></i>
 						</a>
 					</div>
 				</div>
@@ -43,15 +46,55 @@
 			}
 			else if (status == Status.Editing)
 			{
-				
+				<EditForm Model="Category" class="d-md-flex gap-3 p-3 align-items-center" OnValidSubmit="HandleUpdate">
+					<DataAnnotationsValidator />
+					<div class="flex-grow-1 hstack gap-2 align-items-center" role="button">
+						<span class="badge bg-secondary rounded-pill small" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id">
+							@Category.Contacts.Count
+						</span>
+						<div class="vstack gap-2">
+							<InputText @bind-Value="Category.Name" class="form-control" />
+							<ValidationMessage For="() => Category.Name" />
+						</div>
+					</div>
+					<div class="mt-2 mt-md-0">
+						<span class="text-nowrap">
+							<button type="submit" class="btn btn-primary btn-sm me-1">
+								<i class="bi bi-floppy"></i>
+								Save Changes
+							</button>
+							<button type="button" class="btn btn-sm btn-danger" @onclick="CancelEdit">
+								<i class="bi bi-x"></i>
+								Cancel
+							</button>
+						</span>
+					</div>
+				</EditForm>
 			}
 		</div>
 		<div id="collapse-@Category.Id" class="accordion-collapse collapse" data-bs-parent="@AccordionId">
 			<div class="accordion-body">
 				<ul class="list-group">
-					<li class="list-group-item text-center lead text-secondary">
-						Information About Category Goes Here
-					</li>
+						@if (Category.Contacts.Count > 0)
+						{
+							foreach (ContactDTO contact in Category.Contacts)
+							{
+							<li class="list-group-item">
+								<a href="contacts/edit/@contact.Id" class="hstack gap-3 align-items-center text-decoration-none text-dark">
+									<img class="contact-preview-img" src="@contact.ImageURL" alt="Image for @contact.FullName" />
+									<span>@contact.FullName</span>
+								</a>
+							</li>
+							}
+						}
+						else
+						{
+						<li class="list-group-item text-center lead text-secondary">
+							No contacts in this category
+						</li>
+						}
+
+				
 				</ul>
 			</div>
 		</div>
@@ -68,6 +111,9 @@
 	[Parameter, EditorRequired]
 	public EventCallback<int> OnDelete { get; set; }
 
+	[Parameter, EditorRequired]
+	public EventCallback<CategoryDTO> OnUpdate { get; set; }
+
 	private enum Status
 	{
 		Viewing,
@@ -77,9 +123,35 @@
 
 	private Status status = Status.Viewing;
 
+	private string? originalRecipe;
+
+	protected override void OnParametersSet()
+	{
+		if (Category != null)
+		{
+			originalRecipe = Category.Name;
+		}
+	}
+
+	private void CancelEdit()
+	{
+		if (!string.IsNullOrEmpty(originalRecipe))
+		{
+			Category!.Name = originalRecipe;
+		}
+
+		status = Status.Viewing;
+	}
+
 	private async Task HandleDelete()
 	{
 		await OnDelete.InvokeAsync(Category!.Id);
+		status = Status.Viewing;
+	}
+
+	private async Task HandleUpdate()
+	{
+		await OnUpdate.InvokeAsync(Category);
 		status = Status.Viewing;
 	}
 }

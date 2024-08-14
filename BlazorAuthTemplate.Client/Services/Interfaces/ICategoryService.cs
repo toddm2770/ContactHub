@@ -17,10 +17,10 @@ namespace BlazorAuthTemplate.Client.Services.Interfaces
 		Task<CategoryDTO?> GetCategoryByIdAsync(int categoryId, string userId);
 
 		// Update
-		//Task UpdateCategoryAsync(CategoryDTO category, string userId);
+		Task UpdateCategoryAsync(CategoryDTO category, string userId);
 
 
 		// Email
-		// Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId);
+		 Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId);
 	}
 }

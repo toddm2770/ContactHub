@@ -1,7 +1,7 @@
 ﻿@page "/categories"
 @using BlazorAuthTemplate.Client.Helpers
 @using BlazorAuthTemplate.Client.Models
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
 @attribute [Authorize]
 
 @inject ICategoryService CategoryService
@@ -24,7 +24,7 @@
 			</li>
 		</ul>
 	</EditForm>
-	<CategoryAccordion Categories="categories" OnCategoryDelete="DeleteCategory"/>
+	<CategoryAccordion Categories="categories" OnCategoryDelete="DeleteCategory" OnCategoryUpdate="UpdateCategory" />
 </div>
 
 @code {
@@ -76,6 +76,20 @@
 			categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
 		}
 		catch(Exception ex)
+		{
+			Console.WriteLine(ex);
+			throw;
+		}
+	}
+
+	private async Task UpdateCategory(CategoryDTO category)
+	{
+		try
+		{
+			await CategoryService.UpdateCategoryAsync(category, userInfo!.UserId);
+			categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+		}
+		catch (Exception ex)
 		{
 			Console.WriteLine(ex);
 			throw;

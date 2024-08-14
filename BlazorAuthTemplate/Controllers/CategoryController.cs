@@ -36,7 +36,7 @@ namespace BlazorAuthTemplate.Controllers
 			}
 		}
 
-		[HttpGet]
+		[HttpGet("{id:int}")]
 		public async Task<ActionResult<CategoryDTO?>> GetCategoryById([FromRoute] int id)
 		{
 			try
@@ -73,6 +73,43 @@ namespace BlazorAuthTemplate.Controllers
 			{
 				await _categoryService.DeleteCategoryAsync(id, _userId);
 				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return Problem();
+			}
+		}
+
+		[HttpPut("{id:int}")]
+		public async Task<ActionResult> UpdateCategory([FromRoute] int id, [FromBody] CategoryDTO category)
+		{
+			if (id != category.Id)
+			{
+				return BadRequest();
+			}
+
+			try
+			{
+				await _categoryService.UpdateCategoryAsync(category, _userId);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+
+				Console.WriteLine(ex);
+				return Problem();
+			}
+		}
+
+		[HttpPost("{id:int}/email")]
+		public async Task<ActionResult> EmailCategory([FromRoute] int id, [FromBody] EmailData emailData)
+		{
+			try
+			{
+				bool success = await _categoryService.EmailCategoryAsync(id, emailData, _userId);
+
+				return success ? Ok() : BadRequest();
 			}
 			catch (Exception ex)
 			{

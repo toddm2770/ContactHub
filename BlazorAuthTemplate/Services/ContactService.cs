@@ -80,7 +80,7 @@ namespace BlazorAuthTemplate.Services
 				contact.State = contactDTO.State;
 				contact.ZipCode = contactDTO.ZipCode;
 				contact.BirthDate = contactDTO.BirthDate;
-			}
+			
 
 			if (contactDTO.ImageURL.StartsWith("data:"))
 			{
@@ -101,8 +101,8 @@ namespace BlazorAuthTemplate.Services
 			//add back the new categories
 			IEnumerable<int> selectedCategoryIds = contactDTO.Categories.Select(c => c.Id);
 			await _repository.AddCategoriesToContactAsync(contact.Id, selectedCategoryIds, userId);
-
-		}
+            }
+        }
 
 		public async Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId)
 		{

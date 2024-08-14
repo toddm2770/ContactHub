@@ -30,6 +30,20 @@ namespace BlazorAuthTemplate.Client.Services
 			response.EnsureSuccessStatusCode();
 		}
 
+		public async Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId)
+		{
+			try
+			{
+				HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"api/category/{categoryId}/email", emailData);
+				return response.IsSuccessStatusCode;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return false;
+			}
+		}
+
 		public async Task<IEnumerable<CategoryDTO>> GetCategoriesAsync(string userId)
 		{
 			return await _httpClient.GetFromJsonAsync<IEnumerable<CategoryDTO>>("api/category") ?? [];
@@ -40,9 +54,10 @@ namespace BlazorAuthTemplate.Client.Services
 			return await _httpClient.GetFromJsonAsync<CategoryDTO>($"api/category/{categoryId}");
 		}
 
-		public Task UpdateCategoryAsync(CategoryDTO category, string userId)
+		public async Task UpdateCategoryAsync(CategoryDTO category, string userId)
 		{
-			throw new NotImplementedException();
+			HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/category/{category.Id}", category);
+			response.EnsureSuccessStatusCode();
 		}
 	}
 }

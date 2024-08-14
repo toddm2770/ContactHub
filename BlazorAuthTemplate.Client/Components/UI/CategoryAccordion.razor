@@ -1,7 +1,7 @@
 ﻿<div class="accordion" id="@accordionId">
 	@foreach (var category in Categories)
 	{
-		<CategoryAccordionItem Category="category" AccordionId="@accordionId" @key="category.Id" OnDelete="OnCategoryDelete"/>
+		<CategoryAccordionItem Category="category" AccordionId="@accordionId" @key="category.Id" OnUpdate="OnCategoryUpdate" OnDelete="OnCategoryDelete" />
 	}
 </div>
 
@@ -14,4 +14,8 @@
 
 	[Parameter, EditorRequired]
 	public EventCallback<int> OnCategoryDelete { get; set; }
+
+	[Parameter, EditorRequired]
+	public EventCallback<CategoryDTO> OnCategoryUpdate { get; set; }
 }
+

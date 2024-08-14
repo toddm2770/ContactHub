@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using BlazorAuthTemplate.Client.Models.Enums;
+using BlazorAuthTemplate.Client.Helpers;
 
 namespace BlazorAuthTemplate.Client.Models
 {
@@ -68,7 +69,7 @@ namespace BlazorAuthTemplate.Client.Models
             set => _created = value.ToUniversalTime();
         }
 
-        public string? ImageURL { get; set; }
+        public string? ImageURL { get; set; } = ImageHelper.DefaultContactImage;
 
         public virtual ICollection<CategoryDTO> Categories { get; set; } = [];
     }

@@ -1,6 +1,6 @@
 ﻿@page "/contacts"
 @attribute [Authorize]
-@rendermode InteractiveWebAssembly
+@rendermode InteractiveAuto
 @inject IContactService ContactService
 @inject ICategoryService CategoryService
 @inject NavigationManager Nav
@@ -57,10 +57,12 @@
 			}
 		</div>
 		<div class="col-12 col-lg-8">
-			<div class="row row-cols-1 container">
+			<div class="row row-cols-1 row-cols-sm-2 row-cols-md-1 g-3 container">
 				@foreach(var Contact in contacts)
 				{
-						<ContactCard Contact="Contact"></ContactCard>
+					<div class="col" @key="Contact.Id">
+						<ContactCard Contact="Contact" OnDelete="HandleDelete"></ContactCard>
+					</div>
 				}
 			</div>
 		</div>
@@ -165,6 +167,20 @@
 
 		string url = Nav.GetUriWithQueryParameters(queryParameters);
 		Nav.NavigateTo(url);
+	}
+
+	private async Task HandleDelete(int contactId)
+	{
+		try
+		{
+			await ContactService.DeleteContactAsync(contactId, userInfo!.UserId);
+			contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+			throw;
+		}
 	}
 
 	private void ShowToastMessage(string message)

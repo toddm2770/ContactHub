@@ -22,9 +22,29 @@
 					<div class="card-text">
 						<span class="fw-bold me-2">Email:</span>@Contact.Email
 					</div>
-					<div>
-						<a href="/contacts/edit/@Contact.Id"><i class="bi bi-pencil-fill"></i></a>
-						<a href="/contacts/email/@Contact.Id"><i class="bi bi-envelope-fill"></i></a>
+
+					@if (isDeleting == false)
+					{
+						<div>
+							<a class="me-3" href="/contacts/edit/@Contact.Id"><i class="bi bi-pencil-fill"></i></a>
+							<a class="me-3" href="/contacts/email/@Contact.Id"><i class="bi bi-envelope-fill"></i></a>
+							<a class="me-3" editIcons" role="button" @onclick="() => isDeleting = true"><i class="bi bi-trash-fill text-danger"></i></a>
+						</div>
+					}
+					else
+					{
+						<div class="text-danger">Are you sure you want to DELETE this contact?</div>
+						<button class="btn btn-sm btn-danger me-1" @onclick="DeleteContact">Delete</button>
+						<button class="btn btn-sm btn-success me-2" @onclick="() => isDeleting = false">Cancel</button>
+					}
+
+					<div class="hstack gap-2 flex-wrap mt-2">
+						@foreach (CategoryDTO category in Contact.Categories)
+						{
+							<a href="contact?categoryId=@category.Id" class="text-decoration-none badge rounded-pill border border-1 text-dark fw-normal">
+								@category.Name
+							</a>
+						}
 					</div>
 				</div>
 			</div>
@@ -37,4 +57,15 @@
 @code {
 	[Parameter, EditorRequired]
 	public ContactDTO? Contact { get; set; }
+
+	[Parameter, EditorRequired]
+	public EventCallback<int> OnDelete { get; set; }
+
+	bool isDeleting = false;
+
+	private async Task DeleteContact()
+	{
+		await OnDelete.InvokeAsync(Contact!.Id);
+		isDeleting = false;
+	}
 }
