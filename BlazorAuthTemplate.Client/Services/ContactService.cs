@@ -55,7 +55,9 @@ namespace BlazorAuthTemplate.Client.Services
 
 		public async Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId)
 		{
-			return await _httpClient.GetFromJsonAsync<IEnumerable<ContactDTO>>("api/contacts") ?? [];
+			var contacts = await _httpClient.GetFromJsonAsync<IEnumerable<ContactDTO>>("api/contacts") ?? [];
+			return contacts;
+			
 		}
 
 		public async Task<IEnumerable<ContactDTO>> SearchContactsAsync(string searchTerm, string userId)
