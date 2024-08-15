@@ -13,7 +13,7 @@ namespace BlazorAuthTemplate.Data
         public static string? GetConnectionString(IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection"); //local connection string
-            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PRIVATE_URL");   //RailWay connection string
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");   //RailWay connection string
             return string.IsNullOrEmpty(databaseUrl) ? connectionString : BuildConnectionString(databaseUrl);
         }
 
